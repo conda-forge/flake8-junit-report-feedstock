@@ -6,11 +6,11 @@ package:
   version: {{ version }}
 
 source:
-  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  url: https://pypi.org/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
   sha256: f8890c1ebe0acb516fefacddec4b802bca9f89bb07db933e4ee3cd11ceaa1e8b
 
 build:
-  number: 0
+  number: 1
   noarch: python
   script:
     - {{ PYTHON }} -m pip install . --no-deps -vv
@@ -19,13 +19,15 @@ build:
 
 requirements:
   host:
-    - python >=2.7
+    - python {{ python_min }}
     - pip
   run:
-    - python >=2.7
+    - python >={{ python_min }}
     - flake8
 
 test:
+  requires:
+    - python {{ python_min }}
   imports:
     - junit_conversor
   files:
@@ -40,7 +42,7 @@ outputs:
       noarch: python
     requirements:
       host:
-        - python
+        - python {{ python_min }}
       run:
         - {{ pin_subpackage( name|lower, exact=True) }}
 
