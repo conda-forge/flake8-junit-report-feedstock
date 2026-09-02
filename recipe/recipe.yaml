@@ -1,0 +1,73 @@
+schema_version: 1
+
+context:
+  version: "2.1.0"
+  python_min: "3.11"
+
+recipe:
+  name: flake8-junit-report
+  version: ${{ version }}
+
+source:
+  url: https://pypi.org/packages/source/f/flake8-junit-report/flake8-junit-report-${{ version }}.tar.gz
+  sha256: f8890c1ebe0acb516fefacddec4b802bca9f89bb07db933e4ee3cd11ceaa1e8b
+
+build:
+  number: 2
+  noarch: python
+
+outputs:
+  - package:
+      name: flake8-junit-report
+    build:
+      noarch: python
+      script: ${{ PYTHON }} -m pip install . --no-deps -vv
+      python:
+        entry_points:
+          - flake8_junit = junit_conversor.__main__:main
+    requirements:
+      host:
+        - python ${{ python_min }}.*
+        - pip
+        - setuptools
+      run:
+        - python >=${{ python_min }}
+        - flake8
+    tests:
+      - python:
+          imports:
+            - junit_conversor
+          pip_check: true
+          python_version:
+            - ${{ python_min }}
+            - "*"
+      - files:
+          recipe:
+            - test_flake8_file.py
+        requirements:
+          run:
+            - python ${{ python_min }}.*
+        script:
+          - flake8 test_flake8_file.py --output-file flake8.txt || python -m junit_conversor flake8.txt flake8_junit.xml
+
+  - package:
+      name: flake8_junit_report
+    build:
+      noarch: python
+    requirements:
+      host:
+        - python ${{ python_min }}.*
+      run:
+        - ${{ pin_subpackage("flake8-junit-report", exact=True) }}
+
+about:
+  homepage: https://github.com/initios/flake8-junit-report
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file: LICENSE
+  summary: Simple tool that converts a flake8 file to junit format. Use it on your CI server to see the flake8 failures with ease
+  repository: https://github.com/initios/flake8-junit-report
+
+extra:
+  recipe-maintainers:
+    - timkpaine
